@@ -1,0 +1,150 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>Phaser - Making your first game, part 1</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+function preload() 
+{
+	//game.load.image('sky', 'assets/sky.png');
+	//game.load.image('ground', 'assets/platform.png');
+	game.load.image('star', 'assets/star.png');
+	game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+}
+
+var Livingthing;
+var soldier;
+var soldiers = [];
+var boss;
+var walls;
+
+var bullets;
+var fireRate = 100;
+
+var cursors;
+
+var score = 0;
+var EndgameText;
+
+function create() 
+{
+	game.physics.startSystem(Phaser.Physics.ARCADE);
+
+	cursors = game.input.keyboard.createCursorKeys();
+
+	// boss
+	boss = game.add.sprite(game.world.width/2, game.world.height/2, 'star');
+	game.physics.arcade.enable(boss);
+
+
+	bullets = game.add.group();
+	bullets.enableBody = true;
+	bullets.physicsBodyType = Phaser.Physics.ARCADE;
+	// maximum no. of bullets
+	bullets.createMultiple(100, 'bullet', 0, false);
+	bullets.setAll('anchor.x', 0.5);
+	bullets.setAll('anchor.y', 0.5);
+	bullets.setAll('outOfBoundsKill', true);
+	bullets.setAll('checkWorldBounds', true);
+
+}
+
+var clickLock = false;
+
+function update() 
+{
+	// click create soldier
+
+	if (game.input.activePointer.isDown && !clickLock)
+	{
+		var x = game.input.x;
+		var y = game.input.y;
+		soldiers.push(new Soldier(game, x, y, boss, bullets));
+		clickLock = true;
+	}
+
+	if (game.input.activePointer.isUp)
+		clickLock = false;
+
+	Soldier.update();
+
+}
+
+
+function Soldier(game, x, y, boss, bullets)
+{
+	this.game = game;
+	this.boss = boss;
+	this.health = 5;
+	this.fireRate = 1000;
+	this.nextFire = 0;
+	this.minDistance = 1;
+	this.maxSpeed = 10;
+
+	this.soldier = game.add.sprite(x, y, 'dude');
+
+	this.soldier.anchor.set(0.5,0.5);
+
+	game.physics.enable(this.soldier, Phaser.Physics.ARCADE);
+	this.soldier.body.immovable = false;
+	this.soldier.body.collideWorldBounds = true;
+
+}
+
+Soldier.prototype.damage = function(){
+	this.health -= 1;
+	if (this.health <= 0)
+	{
+		this.alive = false;
+		this.soldier.kill();
+		return true;
+	}
+	return false;
+}
+
+Soldier.prototype.update = function(){
+	console.log('updating soldier...');
+	// follow boss
+	var distance = this.game.math.distance(this.x, this.y, this.boss.x, this.boss.y);
+	// move
+	if (distance > this.minDistance)
+	{
+		var rotation = this.game.math.angleBetween(this.x, this.y, this.boss.x, this.boss.y);
+
+		this.body.velocity.x = Math.cos(rotation)*this.maxSpeed;
+		this.body.velocity.y = Math.sin(rotation)*this.maxSpeed;
+	}
+
+	// range shoot
+	if (this.game.physics.arcade.distanceBetween(this.soldier, this.boss) < 300)
+	{
+		if (this.game.time.now > this.nextFire)
+		{
+			this.nextFire = this.game.time.now + this.fireRate;
+			var bullet;
+			if (this.bullets.countDead() == 0)
+				bullet = this.bullets
+		}
+		else
+		{
+			this.body.velocity.setTo(0,0);
+		}
+	}
+}
+
+</script>
+
+</body>
+</html>

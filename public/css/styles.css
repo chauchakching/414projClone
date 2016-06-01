@@ -1,0 +1,42 @@
+body {
+    background-color: #2E2E2E;
+}
+#head_div {
+    height: 100px;
+}
+#game_div_all {}
+#game_div {
+    float: left;
+    width: 840px;
+    height: 575px;
+}
+#editors_div {
+    float: left;
+    width: 900px;
+}
+.editor_div {
+    position: absolute;
+    height: 700px;
+    width: 840px;
+}
+#tutdisplay {
+    position: absolute;
+    height: 700px;
+    width: 840px;
+}
+@media screen and (min-width: 1380px) {
+    #editors_div {
+        float: left;
+        width: 500px;
+    }
+    .editor_div {
+        position: absolute;
+        height: 510px;
+        width: 500px;
+    }
+    #tutdisplay {
+        position: absolute;
+        height: 510px;
+        width: 500px;
+    }
+}

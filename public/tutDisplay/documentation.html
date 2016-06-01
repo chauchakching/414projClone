@@ -1,0 +1,122 @@
+<div class="list-group">
+    <div class="list-group-item list-group-item-success">
+        <h4 class="list-group-item-heading">Mission : Destroy enemy's tower</h4>
+    </div>
+    <div class="list-group-item">
+        <h2 class="list-group-item-heading">Documentation</h4>
+        <h3 class="list-group-item-heading">Scripts</h4>
+        <h4 class="list-group-item-heading">Start</h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>This is used as some parameter initialization for later use by scripts <b>Soldier</b> and <b>Wizard</b>. The script will run only once at the begining of the game. 
+To initialize a variable named <b>foobar</b>, try <code>my.foobar = ...</code> . The <b>Soldier</b> and <b>Wizard</b> scripts can access and modify the variable by <code>my.foobar</code>. Note that the variable is shared among all player units.</li>
+            </ul>
+        </p><br />
+        <h4 class="list-group-item-heading">Soldier, Wizard</h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>This script is applied to the corresponding type of player's unit frequently for unit control.</li>
+            </ul>
+        </p><br />
+        <h3 class="list-group-item-heading">Functions (Soldier, Wizard)</h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>To apply function <b>ff</b> on an unit obecjt <b>unit</b> returned by function, try <code>unit.ff()</code>.</li>
+            </ul>
+        </p>
+    </div>
+
+    <div class="list-group-item f_doc" id='getEnemyInRange_f'>
+        <h4 class="list-group-item-heading"><code>this.getEnemyInRange()</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>Return an array of all enemy within unit’s sight range (yellow circle)
+                </li>
+            </ul>
+        </p>
+    </div>
+    <div class="list-group-item f_doc" id='getAllyInRange_f'>
+        <h4 class="list-group-item-heading"><code>this.getAllyInRange()</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>Return an array of all ally within unit’s sight range (yellow circle)
+                </li>
+            </ul>
+        </p>
+    </div>
+    <div class="list-group-item f_doc" id='attack_f'>
+        <h4 class="list-group-item-heading"><code>this.attack ( target )</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>Attack target if target is within attack range. Otherwise performs moveTo(target). If no target given, automatically use return of getClosestEnemy() as target.
+                </li>
+            </ul>
+        </p>
+    </div>
+    <div class="list-group-item f_doc" id='moveToXY_f'>
+        <h4 class="list-group-item-heading"><code>this.moveToXY ( [x, y] )</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>to move towards a specific point in map</li>
+                <li> return true if arrive (x,y)</li>
+            </ul>
+        </p>
+    </div>
+    <div class="list-group-item f_doc" id='moveTo_f'>
+        <h4 class="list-group-item-heading"><code>this.moveTo ( target )</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>Move towards a target in map</li>
+            </ul>
+        </p>
+    </div>
+    <div class="list-group-item f_doc" id='getClosestEnemy_f'>
+        <h4 class="list-group-item-heading"><code>this.getClosestEnemy ()</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>Return the closest enemy in map, including fortress.</li>
+            </ul>
+        </p>
+    </div>
+    <div class="list-group-item f_doc" id='distance_f'>
+        <h4 class="list-group-item-heading"><code>this.distance ( target )</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>Return distance to target.</li>
+            </ul>
+        </p>
+    </div>
+    <div class="list-group-item f_doc" id='getAllEnemy_f'>
+        <h4 class="list-group-item-heading"><code>this.getAllEnemy ()</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>Return an array of all enemy in map, including fortress.</li>
+            </ul>
+        </p>
+    </div>
+    <div class="list-group-item f_doc" id='getCoor_f'>
+        <h4 class="list-group-item-heading"><code>this.getCoor ()</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>Return unit's coordinate as [x,y]</li>
+            </ul>
+        </p>
+    </div>
+    <div class="list-group-item f_doc" id='getHP_f'>
+        <h4 class="list-group-item-heading"><code>this.getHP ()</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>Return unit's health.</li>
+            </ul>
+        </p>
+    </div>
+    <div class="list-group-item f_doc" id='getName_f'>
+        <h4 class="list-group-item-heading"><code>this.getName ()</code></h4>
+        <p class="list-group-item-text">
+            <ul>
+                <li>Return unit's name.</li>
+            </ul>
+        </p>
+    </div>
+    
+</div>

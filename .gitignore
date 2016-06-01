@@ -1,0 +1,4 @@
+node_modules
+node_modules/*
+js/.project
+js/*.bak.js

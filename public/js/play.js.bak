@@ -1,0 +1,359 @@
+var playState = 
+{
+    p1: {},
+    p2: {},
+    start_strategy1: function ()
+    {
+        var my = this.p1
+        eval( startCode1 )
+    },
+    start_strategy2: function ()
+    {
+        var my = this.p2
+        eval( startCode2 )
+    },/*
+    update_strategy1: function (that)
+    {
+        var my = that.p1
+        eval( updateCode1 )
+    },
+    update_strategy2: function (that)
+    {
+        var my = that.p2
+        eval( updateCode2 )
+    },*/
+    
+	create: function ()
+	{
+		//this.background = 
+        this.playerResource = 0;
+        this.playerResourceGrowth = 0.05;
+        this.playerResourceMax = 1000;
+
+		// groups
+		this.soldiers = game.add.group();
+		this.monsters = game.add.group();
+		this.bullets = game.add.group();
+		this.fortress = game.add.group();
+
+		this.killText = game.add.text(20, 20, "");
+
+		// a monster at center of map
+		this.monsters.add (new this.Monster (game, game.world.centerX, game.world.centerY));
+        
+        // 2 Fortress
+		var fortress0 = this.fortress.add (new this.Fortress (game, game.world.centerX/4, game.world.centerY, 0));
+		var fortress1 = this.fortress.add (new this.Fortress (game, game.world.centerX*7/4, game.world.centerY, 1));
+
+		// initialize bullets
+		this.bullets.enableBody = true;
+		this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+		this.bullets.createMultiple (100, 'bullet', 0, false);
+		this.bullets.setAll ('anchor.x', 0,5);
+		this.bullets.setAll ('anchor.y', 0,5);
+		this.bullets.setAll ('outOfBoundsKill', true);
+		this.bullets.setAll ('checkWorldBounds', true);
+
+		// generate units in constant time
+		game.time.events.loop (Phaser.Timer.SECOND, this.generateUnit, fortress0, this.Soldier, this.soldiers);
+        game.time.events.loop (Phaser.Timer.SECOND, this.generateUnit, fortress1, this.Soldier, this.soldiers);
+		//game.time.events.loop (Phaser.Timer.SECOND * 8, this.clearGroup, this, this.soldiers);
+        
+        this.start_strategy1()
+        this.start_strategy2()
+
+	},
+    
+    clearGroup: function (unitGroup)
+    {
+        unitGroup.removeAll();  
+    },
+
+	generateUnit: function (Unit, unitGroup)
+	{
+        var x = this.x;
+        var y = this.y;
+		unitGroup.add(new Unit(game, x, y, this.side));
+	},
+
+	destroyAllSoldiers: function()
+	{
+
+	},
+
+	update: function()
+	{
+        // player resource grow
+        this.playerResource += this.playerResourceGrowth;
+        this.playerResource = Math.max(this.playerResource, this.playerResourceMax);
+		// update text
+		this.killText.setText('Kills: ' + this.kills);
+
+		// collisions
+		//game.physics.arcade.collide(this.soldiers, this.monsters);
+
+		// click to place soldier
+		if (game.input.activePointer.isDown && !clickLock)
+		{
+			var x = game.input.x;
+			var y = game.input.y;
+			//soldiers.push(new Soldier(game, x, y, boss, bullets));
+			this.soldiers.add(new this.Soldier(game, x, y, 1));
+			clickLock = true;
+		}
+		if (game.input.activePointer.isUp)
+			clickLock = false;
+
+		// respawn a monster at random place when all die
+		if (this.monsters.countLiving() == 0)
+		{
+			var randomX = game.rnd.integerInRange(0,600);
+			var randomY = game.rnd.integerInRange(0,600);
+			this.monsters.add(new this.Monster(game, randomX, randomY));
+		}
+
+		// bullet hit (collision detection)
+
+		game.physics.arcade.overlap(this.bullets, this.soldiers, aHitb, null, this);
+		game.physics.arcade.overlap(this.bullets, this.monsters, aHitb, null, this);
+		game.physics.arcade.overlap(this.bullets, this.fortress, aHitb, null, this);
+
+		// overlaps (damaging)
+		//game.physics.arcade.overlap(this.soldiers, this.monsters, hitBoth, null, this);
+	},
+
+	// soldier type
+	Soldier: function (game, x, y, side)
+	{
+		Phaser.Sprite.call (this, game, x, y, 'dude');
+		this.anchor.setTo (0.5, 0.5);
+        
+		this.health = 3;
+		this.maxSpeed = 70;
+		this.minDist = 100;
+		this.nextFire = 0;
+		this.fireRate = 400;
+        this.sightRange = 150;
+        
+        this.side = side;
+		game.physics.enable (this, Phaser.Physics.ARCADE);
+		console.log ('a soldier created.');
+        
+        // link to create
+        if (side == 0)
+            this.my = this.p1
+        else
+            this.my = this.p2
+	},
+
+
+	// monster at center (a star)
+	Monster: function (game, x, y)
+	{
+		Phaser.Sprite.call (this, game, x, y, 'star');
+		this.anchor.setTo (0.5, 0.5);
+		this.health = 10;
+		this.alive = true;
+		game.physics.enable (this, Phaser.Physics.ARCADE);
+	},
+
+	// fortress
+	Fortress: function (game, x, y, side)
+	{
+		Phaser.Sprite.call(this, game, x, y, 'xp');
+		this.anchor.setTo(0.5, 0.5);
+		this.health = 20;
+		this.alive = true;
+        this.side = side;
+		game.physics.enable(this, Phaser.Physics.ARCADE);
+	},
+
+	/*
+	addSoldier: function(x, y) 
+	{
+		var soldier = playState.soldiers.create(x, y, 'dude');
+		soldier.anchor.setTo(0.5, 0.5);
+		soldier.minDist = 10;
+		playState.game.physics.enable(soldier, Phaser.Physics.ARCADE);
+
+	}
+	*/  
+};
+playState.Unit = function(){}
+playState.Unit.prototype = Object.create(Phaser.Sprite.prototype);
+playState.Unit.prototype.moveRight = function()
+{
+    this.body.velocity.x = this.maxSpeed;
+}
+playState.Unit.prototype.moveToXY = function(x,y){
+    var target = new Phaser.Point(x,y)
+    var rotation = game.physics.arcade.angleBetween(this, target);
+    this.body.velocity.x = Math.cos(rotation) * this.maxSpeed;
+    this.body.velocity.y = Math.sin(rotation) * this.maxSpeed;
+    
+}
+playState.Unit.prototype.moveTo = function(target)
+{
+    if (target != null)
+    {
+        var rotation = game.physics.arcade.angleBetween(this, target);
+        this.body.velocity.x = Math.cos(rotation) * this.maxSpeed;
+        this.body.velocity.y = Math.sin(rotation) * this.maxSpeed;
+    }
+}
+
+playState.Soldier.prototype = Object.create( playState.Unit.prototype );
+playState.Soldier.prototype.constructor = playState.Soldier;
+playState.Soldier.prototype.update = function()
+{
+    if (this.side == 0)
+    {
+        try{
+            eval( updateCode1 )
+        }
+        catch (err){
+            console.log('p1 update failed!')
+        }
+    }
+    else
+    {
+        try{
+            eval( updateCode2 )        
+        }
+        catch (err)
+        {
+            console.log('p2 update failed!')
+        }
+    }
+    return
+    /*
+	// find first living monster
+	var theMonster;
+	var distance;
+	var theLivingMonster;
+	if (playState.monsters.countLiving() > 0)
+	{
+		for (var i = 0; i < playState.monsters.children.length; i++)
+		{
+			if (playState.monsters.children[i].alive)
+			{
+				theLivingMonster = playState.monsters.children[i];
+				break;
+			}
+		}
+		distance = game.physics.arcade.distanceBetween(this, theLivingMonster);
+	}
+	// no living monster
+	else return;
+	
+	// move ?
+	if (distance > this.minDist)
+	{
+		var rotation = game.physics.arcade.angleBetween(this, theLivingMonster);
+
+		this.body.velocity.x = Math.cos(rotation) * this.maxSpeed;
+		this.body.velocity.y = Math.sin(rotation) * this.maxSpeed;
+	}
+	// prepare to fire
+	else {
+		// stop moving
+		this.body.velocity.setTo(0, 0);
+		// shot frequency limit
+		if (game.time.now > this.nextFire && playState.bullets.countDead() > 0)
+		{
+			// fire !!!!
+			this.nextFire= game.time.now + this.fireRate;
+			var bullet = playState.bullets.getFirstDead();
+			bullet.reset(this.x, this.y);
+			bullet.rotation = game.physics.arcade.moveToObject(bullet, theLivingMonster, 500);
+		}
+	}
+    */
+    // go destroy another fortress
+    /*
+    var oppositeFortress;
+    playState.fortress.forEach(function (tmp) {
+        if (tmp.side != this.side){
+            oppositeFortress = tmp;
+            break;
+        }
+        
+    });*/
+    var oppositeFortress = playState.fortress.iterate('side', 1 - this.side, Phaser.Group.RETURN_CHILD);
+    // if destroyed, win!
+    if (oppositeFortress != null){
+        /*
+            If enemy or opposite fortress in range, attack.
+            Else move!
+        */
+        var sight = new Phaser.Circle(this.x, this.y, this.sightRange);
+        var target = null;
+        var soldiers = playState.soldiers;
+        // soldier in sight
+        for (var i = 0; i < soldiers.total; i++)
+        {
+            var soldier = soldiers.children[i];
+            // in range?
+            if (sight.contains(soldier.x, soldier.y)){
+                // in opposite side?
+                if (soldier.side != this.side){
+                    target = soldier;
+                    break;
+                }
+            }
+        }
+        // fortress in sight
+        if (sight.contains(oppositeFortress.x, oppositeFortress.y)){
+            target = oppositeFortress;
+        }
+        // move to fortress
+        if (target == null){
+            var rotation = game.physics.arcade.angleBetween(this, oppositeFortress);
+
+            this.body.velocity.x = Math.cos(rotation) * this.maxSpeed;
+            this.body.velocity.y = Math.sin(rotation) * this.maxSpeed;
+        }
+        else {
+            this.body.velocity.setTo(0, 0);
+            // shot frequency limit
+            /*
+            if (game.time.now > this.nextFire && playState.bullets.countDead() > 0)
+            {
+                // fire !!!!
+                this.nextFire= game.time.now + this.fireRate;
+                var bullet = playState.bullets.getFirstDead();
+                bullet.reset(this.x, this.y);
+                bullet.rotation = game.physics.arcade.moveToObject(bullet, target, 500);
+                bullet.side = this.side;
+            }
+            */
+            playState.Shoot(this, playState.bullets, target, 500);
+        }
+    }
+    
+};
+
+// generate function to produce bullet (shooting)
+playState.Shoot = function(unit, projectileGroup, target, speed)
+{
+    if (game.time.now > unit.nextFire && projectileGroup.countDead() > 0)
+    {
+        unit.nextFire = game.time.now + unit.fireRate;
+        var projectile = projectileGroup.getFirstDead();
+        projectile.reset(unit.x, unit.y);
+        projectile.rotation = game.physics.arcade.moveToObject (projectile, target, speed);
+        projectile.side = unit.side;
+    }
+}
+
+// Monster
+playState.Monster.prototype = Object.create(Phaser.Sprite.prototype);
+playState.Monster.prototype.constructor = playState.Monster;
+playState.Monster.prototype.update = function(){
+};
+
+// Fortress
+playState.Fortress.prototype = Object.create(Phaser.Sprite.prototype);
+playState.Fortress.prototype.constructor = playState.Fortress;
+playState.Fortress.prototype.update = function(){
+};
